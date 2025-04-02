@@ -9,6 +9,8 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
 import { Router } from '@angular/router';
 import { TaskService } from '../../../../services/task.service';
+import { ActivatedRoute } from '@angular/router';
+
 
 @Component({
   selector: 'app-task-form',
@@ -99,7 +101,8 @@ export class TaskFormComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private taskService: TaskService,
-    private router: Router
+      private router: Router,
+    private route: ActivatedRoute
   ) {
     this.taskForm = this.fb.group({
       title: ['', Validators.required],
@@ -109,14 +112,32 @@ export class TaskFormComponent implements OnInit {
       status: ['Pending', Validators.required]
     });
   }
+    taskId: number | null = null;
+    ngOnInit(): void {
+        this.taskId = Number(this.route.snapshot.paramMap.get('id'));
 
-  ngOnInit(): void {}
-
-  onSubmit(): void {
-    if (this.taskForm.valid) {
-      this.taskService.createTask(this.taskForm.value).subscribe(() => {
-        this.router.navigate(['/tasks']);
-      });
+        if (this.taskId) {
+            this.taskService.getTaskById(String(this.taskId)).subscribe(task => {
+                this.taskForm.patchValue(task);
+            });
+        }
     }
-  }
+
+    onSubmit(): void {
+        if (this.taskForm.valid) {
+            const taskData = this.taskForm.value;
+
+            if (this.taskId) {
+                // Edit mode
+                this.taskService.updateTask(this.taskId, taskData).subscribe(() => {
+                    this.router.navigate(['/tasks']);
+                });
+            } else {
+                // Create mode
+                this.taskService.createTask(taskData).subscribe(() => {
+                    this.router.navigate(['/tasks']);
+                });
+            }
+        }
+    }
 }

@@ -6,28 +6,42 @@ import { MatIconModule } from '@angular/material/icon';
 import { RouterModule } from '@angular/router';
 import { TaskService } from '../../../../services/task.service';
 import { Task } from '../../../../models/task.model';
+import { MatSortModule } from '@angular/material/sort';
+import { MatSort } from '@angular/material/sort';
+import { ViewChild, AfterViewInit } from '@angular/core';
+import { MatTableDataSource } from '@angular/material/table';
+
+
 
 @Component({
   selector: 'app-task-list',
   standalone: true,
-  imports: [CommonModule, MatTableModule, MatButtonModule, MatIconModule, RouterModule],
+    imports: [CommonModule, MatTableModule, MatButtonModule, MatIconModule, RouterModule, MatSortModule],
+
   template: `
     <div class="task-list-container">
-      <table mat-table [dataSource]="tasks">
+      <table mat-table [dataSource]="dataSource" matSort>
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Title</th>
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Due Date</th>
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Priority</th>
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+
         <ng-container matColumnDef="title">
-          <th mat-header-cell *matHeaderCellDef>Title</th>
-          <td mat-cell *matCellDef="let task">{{task.title}}</td>
+             <th mat-header-cell *matHeaderCellDef mat-sort-header>Title</th>
+            <td mat-cell *matCellDef="let task">{{task.title}}</td>
         </ng-container>
+
         <ng-container matColumnDef="dueDate">
-          <th mat-header-cell *matHeaderCellDef>Due Date</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Due Date</th>
           <td mat-cell *matCellDef="let task">{{task.dueDate | date}}</td>
         </ng-container>
         <ng-container matColumnDef="priority">
-          <th mat-header-cell *matHeaderCellDef>Priority</th>
-          <td mat-cell *matCellDef="let task">{{task.priority}}</td>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Priority</th>
+            <td mat-cell *matCellDef="let task">{{task.priority}}</td>
         </ng-container>
+
         <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
           <td mat-cell *matCellDef="let task">{{task.status}}</td>
         </ng-container>
         <ng-container matColumnDef="actions">
@@ -66,21 +80,32 @@ import { Task } from '../../../../models/task.model';
     }
   `]
 })
-export class TaskListComponent implements OnInit {
-  tasks: Task[] = [];
+export class TaskListComponent implements OnInit, AfterViewInit {
+  
   displayedColumns: string[] = ['title', 'dueDate', 'priority', 'status', 'actions'];
+  dataSource = new MatTableDataSource<Task>();
+  @ViewChild(MatSort) sort!: MatSort;
 
   constructor(private taskService: TaskService) {}
 
-  ngOnInit(): void {
-    this.loadTasks();
-  }
+    ngOnInit(): void {
+        this.loadTasks();
+        this.dataSource.sortingDataAccessor = (item, property) => {
+            if (property === 'priority') {
+                const priorityOrder = { High: 3, Medium: 2, Low: 1 };
+                return priorityOrder[item.priority] || 0;
+            }
+            return (item as any)[property];
+        }
+    }
 
-  loadTasks(): void {
-    this.taskService.getTasks().subscribe(tasks => {
-      this.tasks = tasks;
-    });
-  }
+    loadTasks(): void {
+        this.taskService.getTasks().subscribe(tasks => {
+            this.dataSource.data = tasks;
+            this.dataSource.sort = this.sort;
+        });
+    }
+
 
   deleteTask(id: number): void {
     if (confirm('Are you sure you want to delete this task?')) {
@@ -89,4 +114,9 @@ export class TaskListComponent implements OnInit {
       });
     }
   }
+
+    ngAfterViewInit(): void {
+        this.dataSource.sort = this.sort;
+    }
+
 }

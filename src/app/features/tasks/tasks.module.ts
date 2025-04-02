@@ -2,10 +2,12 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { TasksRoutingModule } from './tasks-routing.module';
+import { TaskDetailComponent } from './pages/task-detail/task-detail.component';
+
 
 
 @NgModule({
-  declarations: [],
+    
   imports: [
     CommonModule,
     TasksRoutingModule

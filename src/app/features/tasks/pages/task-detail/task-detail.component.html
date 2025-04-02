@@ -1,1 +1,17 @@
-<p>task-detail works!</p>
+<div *ngIf="loading">Loading...</div>
+<div *ngIf="error">{{ error }}</div>
+
+<div *ngIf="task && !loading && !error">
+    <h2>{{ task.title }}</h2>
+    <p><strong>Description:</strong> {{ task.description }}</p>
+    <p><strong>Due Date:</strong> {{ task.dueDate | date }}</p>
+    <p><strong>Priority:</strong> {{ task.priority }}</p>
+    <p><strong>Status:</strong> {{ task.status }}</p>
+
+    <button (click)="goBack()">Back to Tasks</button>
+    <button (click)="editTask()">Edit Task</button>
+    
+
+</div>
+
+
