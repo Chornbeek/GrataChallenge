@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Task Management System Frontend
 
 This is a scaffolded Angular application for the Task Management System. It provides the basic structure and components needed to build a full-featured task management application.
@@ -55,3 +56,7 @@ src/
 - `ng build` - Build the application for production
 - `ng test` - Run unit tests
 - `ng lint` - Run linting
+=======
+# GrataChallenge
+Grata Software Coding Challenge
+>>>>>>> 5839dc744c3aa19a61cdde04f714f7915f1fea55
