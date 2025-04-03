@@ -1,0 +1,12 @@
+
+version: '3.8'
+services:
+  frontend:
+    build: ./task-management-frontend
+    ports:
+      - "4200:80"
+
+  backend:
+    build: ./TaskManagementAPI
+    ports:
+      - "5115:80"

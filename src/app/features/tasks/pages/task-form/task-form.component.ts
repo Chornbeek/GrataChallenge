@@ -1,31 +1,30 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { TaskService } from '../../../../services/task.service';
-import { ActivatedRoute } from '@angular/router';
-
+import { Task } from '../../../../models/task.model';
 
 @Component({
-  selector: 'app-task-form',
-  standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    MatButtonModule
-  ],
-  template: `
+    selector: 'app-task-form',
+    standalone: true,
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
+        MatButtonModule
+    ],
+    template: `
     <div class="task-form-container">
       <h2>Create New Task</h2>
       <form [formGroup]="taskForm" (ngSubmit)="onSubmit()">
@@ -44,6 +43,9 @@ import { ActivatedRoute } from '@angular/router';
           <input matInput [matDatepicker]="picker" formControlName="dueDate">
           <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
           <mat-datepicker #picker></mat-datepicker>
+          <mat-error *ngIf="taskForm.get('dueDate')?.hasError('notFutureDate')">
+            Due date must be in the future.
+          </mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline">
@@ -73,7 +75,7 @@ import { ActivatedRoute } from '@angular/router';
       </form>
     </div>
   `,
-  styles: [`
+    styles: [`
     .task-form-container {
       max-width: 600px;
       margin: 0 auto;
@@ -96,29 +98,33 @@ import { ActivatedRoute } from '@angular/router';
   `]
 })
 export class TaskFormComponent implements OnInit {
-  taskForm: FormGroup;
-
-  constructor(
-    private fb: FormBuilder,
-    private taskService: TaskService,
-      private router: Router,
-    private route: ActivatedRoute
-  ) {
-    this.taskForm = this.fb.group({
-      title: ['', Validators.required],
-      description: [''],
-      dueDate: [null, Validators.required],
-      priority: ['Medium', Validators.required],
-      status: ['Pending', Validators.required]
-    });
-  }
+    taskForm: FormGroup;
     taskId: number | null = null;
+
+    constructor(
+        private fb: FormBuilder,
+        private taskService: TaskService,
+        private router: Router,
+        private route: ActivatedRoute
+    ) {
+        this.taskForm = this.fb.group({
+            title: ['', Validators.required],
+            description: [''],
+            dueDate: [null, [Validators.required, this.futureDateValidator]],
+            priority: ['Medium', Validators.required],
+            status: ['Pending', Validators.required]
+        });
+    }
+
     ngOnInit(): void {
         this.taskId = Number(this.route.snapshot.paramMap.get('id'));
 
         if (this.taskId) {
-            this.taskService.getTaskById(String(this.taskId)).subscribe(task => {
+            this.taskService.getTask(this.taskId).subscribe((task: Task) => {
                 this.taskForm.patchValue(task);
+
+                // Add the id control for update requests
+                this.taskForm.addControl('id', this.fb.control(task.id));
             });
         }
     }
@@ -128,16 +134,27 @@ export class TaskFormComponent implements OnInit {
             const taskData = this.taskForm.value;
 
             if (this.taskId) {
-                // Edit mode
                 this.taskService.updateTask(this.taskId, taskData).subscribe(() => {
                     this.router.navigate(['/tasks']);
                 });
             } else {
-                // Create mode
                 this.taskService.createTask(taskData).subscribe(() => {
                     this.router.navigate(['/tasks']);
                 });
             }
         }
+    }
+
+    futureDateValidator(control: AbstractControl): ValidationErrors | null {
+        const selectedDate = new Date(control.value);
+        const today = new Date();
+
+        // Normalize to 00:00:00
+        today.setHours(0, 0, 0, 0);
+
+        if (selectedDate <= today) {
+            return { notFutureDate: true };
+        }
+        return null;
     }
 }

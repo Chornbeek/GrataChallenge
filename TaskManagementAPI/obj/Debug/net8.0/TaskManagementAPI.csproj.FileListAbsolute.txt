@@ -168,3 +168,8 @@ C:\Users\emmah\OneDrive\Desktop\GrataChallenge\CodingTest\TaskManagementAPI\obj\
 C:\Users\emmah\OneDrive\Desktop\GrataChallenge\CodingTest\TaskManagementAPI\obj\Debug\net8.0\TaskManagementAPI.pdb
 C:\Users\emmah\OneDrive\Desktop\GrataChallenge\CodingTest\TaskManagementAPI\obj\Debug\net8.0\TaskManagementAPI.genruntimeconfig.cache
 C:\Users\emmah\OneDrive\Desktop\GrataChallenge\CodingTest\TaskManagementAPI\obj\Debug\net8.0\ref\TaskManagementAPI.dll
+C:\Users\emmah\OneDrive\Desktop\GrataChallenge\CodingTest\TaskManagementAPI\bin\Debug\net8.0\publish\web.config
+C:\Users\emmah\OneDrive\Desktop\GrataChallenge\CodingTest\TaskManagementAPI\bin\Debug\net8.0\publish\appsettings.Development.json
+C:\Users\emmah\OneDrive\Desktop\GrataChallenge\CodingTest\TaskManagementAPI\bin\Debug\net8.0\publish\appsettings.json
+C:\Users\emmah\OneDrive\Desktop\GrataChallenge\CodingTest\TaskManagementAPI\bin\Debug\net8.0\publish\TaskManagementAPI.deps.json
+C:\Users\emmah\OneDrive\Desktop\GrataChallenge\CodingTest\TaskManagementAPI\bin\Debug\net8.0\publish\TaskManagementAPI.runtimeconfig.json

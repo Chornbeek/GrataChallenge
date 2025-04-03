@@ -4,7 +4,6 @@ using TaskManagementAPI.Data;
 using TaskManagementAPI.Models;
 using TaskManagementAPI.Services;
 
-
 namespace TaskManagementAPI.Controllers
 {
     [ApiController]
@@ -20,15 +19,6 @@ namespace TaskManagementAPI.Controllers
             _taskService = taskService;
         }
 
-        // ✅ New custom query endpoint
-        [HttpGet("due-soon")]
-        public async Task<ActionResult<IEnumerable<AppTask>>> GetTasksDueSoon()
-        {
-            var tasks = await _taskService.GetTasksDueSoonAsync();
-            return Ok(tasks);
-        }
-
-
         // GET: /api/tasks
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AppTask>>> GetTasks()
@@ -41,27 +31,12 @@ namespace TaskManagementAPI.Controllers
         public async Task<ActionResult<AppTask>> GetTask(int id)
         {
             var task = await _context.Tasks.FindAsync(id);
-            if (task == null) return NotFound();
-            return task;
+            return task == null ? NotFound() : Ok(task);
         }
-
-        [HttpGet("count-by-priority")]
-        public async Task<ActionResult<IEnumerable<object>>> GetCountByPriority()
-        {
-            var result = await _taskService.GetTaskCountByPriorityAsync();
-            return Ok(result);
-        }
-        [HttpGet("overdue")]
-        public async Task<ActionResult<IEnumerable<AppTask>>> GetOverdueTasks()
-        {
-            var tasks = await _taskService.GetOverdueTasksAsync();
-            return Ok(tasks);
-        }
-
 
         // POST: /api/tasks
         [HttpPost]
-        public async Task<ActionResult<AppTask>> CreateTask(AppTask task)
+        public async Task<ActionResult<AppTask>> CreateTask([FromBody] AppTask task)
         {
             _context.Tasks.Add(task);
             await _context.SaveChangesAsync();
@@ -70,9 +45,10 @@ namespace TaskManagementAPI.Controllers
 
         // PUT: /api/tasks/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateTask(int id, AppTask updatedTask)
+        public async Task<IActionResult> UpdateTask(int id, [FromBody] AppTask updatedTask)
         {
-            if (id != updatedTask.Id) return BadRequest();
+            if (id != updatedTask.Id)
+                return BadRequest("Task ID mismatch.");
 
             _context.Entry(updatedTask).State = EntityState.Modified;
 
@@ -98,25 +74,48 @@ namespace TaskManagementAPI.Controllers
 
             _context.Tasks.Remove(task);
             await _context.SaveChangesAsync();
-
             return NoContent();
         }
 
+        // GET: /api/tasks/due-soon
+        [HttpGet("due-soon")]
+        public async Task<ActionResult<IEnumerable<AppTask>>> GetTasksDueSoon()
+        {
+            var tasks = await _taskService.GetTasksDueSoonAsync();
+            return Ok(tasks);
+        }
+
+        // GET: /api/tasks/count-by-priority
+        [HttpGet("count-by-priority")]
+        public async Task<ActionResult<IEnumerable<object>>> GetCountByPriority()
+        {
+            var result = await _taskService.GetTaskCountByPriorityAsync();
+            return Ok(result);
+        }
+
+        // GET: /api/tasks/overdue
+        [HttpGet("overdue")]
+        public async Task<ActionResult<IEnumerable<AppTask>>> GetOverdueTasks()
+        {
+            var tasks = await _taskService.GetOverdueTasksAsync();
+            return Ok(tasks);
+        }
+
+        // PUT: /api/tasks/update-status
+        [HttpPut("update-status")]
+        public async Task<ActionResult> UpdateStatuses([FromBody] StatusUpdateRequest request)
+        {
+            if (request.TaskIds == null || request.TaskIds.Count == 0)
+                return BadRequest("No task IDs provided.");
+
+            var updatedCount = await _taskService.UpdateTaskStatusesAsync(request.TaskIds, request.NewStatus);
+            return Ok(new { Updated = updatedCount });
+        }
+
         public class StatusUpdateRequest
-{
-    public List<int> TaskIds { get; set; } = new();
-    public string NewStatus { get; set; } = string.Empty;
-}
-
-[HttpPut("update-status")]
-public async Task<ActionResult> UpdateStatuses([FromBody] StatusUpdateRequest request)
-{
-    if (request.TaskIds == null || request.TaskIds.Count == 0)
-        return BadRequest("No task IDs provided.");
-
-    var updatedCount = await _taskService.UpdateTaskStatusesAsync(request.TaskIds, request.NewStatus);
-    return Ok(new { Updated = updatedCount });
-}
-
+        {
+            public List<int> TaskIds { get; set; } = new();
+            public string NewStatus { get; set; } = string.Empty;
+        }
     }
 }

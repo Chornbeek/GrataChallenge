@@ -4,12 +4,14 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TaskService } from '../../../../services/task.service';
 import { switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
+import { Task } from '../../../../models/task.model';
+
 @Component({
     selector: 'app-task-detail',
     standalone: true,
     imports: [
         CommonModule,
-        DatePipe 
+        DatePipe
     ],
     templateUrl: './task-detail.component.html',
     styleUrls: ['./task-detail.component.scss']
@@ -17,13 +19,12 @@ import { of } from 'rxjs';
 export class TaskDetailComponent {
     private route = inject(ActivatedRoute);
     private taskService = inject(TaskService);
-    
-    constructor(private router: Router) { }
-    task: any;
+    private router = inject(Router);
+
+    task: Task | null = null;
     loading = true;
     error: string | null = null;
     taskId: number | null = null;
-
 
     ngOnInit() {
         this.taskId = Number(this.route.snapshot.paramMap.get('id'));
@@ -35,27 +36,28 @@ export class TaskDetailComponent {
                     this.error = 'Invalid task ID.';
                     return of(null);
                 }
-                return this.taskService.getTaskById(id); // make sure this exists
+                return this.taskService.getTask(Number(id)); 
             })
         ).subscribe({
-            next: task => {
+            next: (task: Task | null) => {
                 this.task = task;
                 this.loading = false;
             },
-            error: err => {
+            error: () => {
                 this.error = 'Error loading task.';
                 this.loading = false;
             }
         });
     }
+
+
     goBack() {
         this.router.navigate(['/tasks']);
     }
 
     editTask(): void {
-        this.router.navigate([`/tasks/${this.task.id}/edit`]);
+        if (this.task) {
+            this.router.navigate([`/tasks/${this.task.id}/edit`]);
+        }
     }
-
-
-
 }
