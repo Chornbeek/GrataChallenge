@@ -11,15 +11,19 @@ This is a scaffolded Angular application for the Task Management System. It prov
 ## Setup Instructions
 
 1. Clone the repository
-2. Install dependencies:
+   git clone https://github.com/Chornbeek/GrataChallenge.git
+   cd GrataChallenge
+3. Install dependencies:
    ```bash
    npm install
    ```
-3. Start the development server:
+4. Start the development server:
    ```bash
+   cd TaskManagementFrontend
+   npm install
    ng serve
    ```
-4. Navigate to `http://localhost:4200` in your browser
+5. Navigate to `http://localhost:4200` in your browser
 
 ## Project Structure
 
@@ -55,6 +59,36 @@ src/
 - `ng build` - Build the application for production
 - `ng test` - Run unit tests
 - `ng lint` - Run linting
+
+  ## Task Management System Backend
+  1. Clone repo.
+    git clone https://github.com/Chornbeek/GrataChallenge.git
+    cd GrataChallenge
+2. Navigate to backend project:
+   cd TaskManagementAPI
+3. Build project
+   dotnet build
+4. Run Project
+   dotnet run
+5. Access backend with:
+   http://localhost:5115
+
+   ##Database Migrations
+   cd TaskManagementAPI
+   dotnet ef database update
+
+   ## Deployment Instructions:
+   Prerequisites:
+   - Docker and Docker Compose Installed
+   1. CLone repo.
+      git clone https://github.com/Chornbeek/GrataChallenge.git
+      cd GrataChallenge
+   2. Build and run containers
+      docker-compose up --build
+   3. Access applications
+      -Frontend: http://localhost:4200
+      -Backend: http://localhost:5115/swagger
+
 =======
 # GrataChallenge
 Grata Software Coding Challenge
